@@ -59,8 +59,8 @@ Please ensure that you comply with the terms of the CC BY-NC-SA 4.0 license, whi
 1. Setting up the environment
 - Clone the repository 
 ```bash
-git clone https://github.com/jibnorge/Airbnb-NYC-Price-Prediction.git
-cd Airbnb-NYC-Price-Prediction
+git clone https://github.com/jibnorge/E-commerce-Churn-Analysis.git
+cd E-commerce-Churn-Analysis
 ```
 
 - Create a virtual python environment
@@ -74,7 +74,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-- Open jupyter notebook and run the **airbnb.ipynb** file.
+- Open jupyter notebook and run the **churn.ipynb** file.
 
 
 <a name="tools-techniques"></a>
@@ -91,8 +91,7 @@ pip install -r requirements.txt
 - SciPy
 
 ### Techniques
-To evaluate the performance of nine regression models we use mean squared 
-error, root mean squared error, mean absolute error and r2 score as evaluation metrics.
+To evaluate the performance of classification models we use classification report and confusion metrics as evaluation metrics.
 
 <a name="data-prep"></a>
 ## Data Preperation and Understanding
@@ -101,7 +100,7 @@ One of the first steps engaged in was to outline the sequence of steps that will
 <a name="phase-1"></a>
 ### Phase I - Data Extraction and Cleaning
 - Reading the dataset using Pandas
-- Identifying and handling missing values, outliers and duplicates
+- Identifying and handling missing values and duplicates
 - Checking for data inconsistencies and correcting them
 - Converting data types as necessary
 - Dropping irrelevant or redundant columns
