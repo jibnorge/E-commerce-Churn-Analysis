@@ -10,17 +10,10 @@ This repository contains a comprehensive churn analysis for an e-commerce websit
 6. [Data Preperation and Understanding](data-prep)
     - [Phase I - Data Extraction and Cleaning](phase-1)
     - [Phase II - Exploratory Data Analysis](#phase-2)
-    - [Phase III - Feature Engineering](#phase-3)
 7. [Fitting Models to the Data](model-fitting)
-    - [Linear Regression](#lin-reg)
+    - [Logistic Regression](#log-reg)
     - [Decision Tree](#dt)
     - [Random Forest](#rf)
-    - [KNN](#knn)
-    - [Ada Boost](#ada-boost)
-    - [Gradient Boost](#gradient-boost)
-    - [Light GBM](#light-gbm)
-    - [Cat Boost](#cat-boost)
-    - [XG Boost](#xg-boost)
 8. [Key Findings](#key-findings)
 9. [Recommendations](#recommendation)
 10. [Conclusion](#conclusion)
@@ -86,9 +79,6 @@ pip install -r requirements.txt
 - NumPy
 - Seaborn
 - scikit-learn
-- Plotly
-- Folium
-- SciPy
 
 ### Techniques
 To evaluate the performance of classification models we use classification report and confusion metrics as evaluation metrics.
@@ -107,20 +97,11 @@ One of the first steps engaged in was to outline the sequence of steps that will
 
 <br><br>
 
-<img src="images\summary 1.png" alt="descriptive-statistics"></img>
+The shape of the dataset is : (5630, 20)
 
-The shape of the dataset is : (48895, 16)
+During the data preprocessing phase, there were some inconsistencies, such as duplicate entries in categorical columns. For instance, categories like "mobile phone" and "phone" referred to the same item but were recorded under different labels. These duplicates were consolidated to ensure uniformity across the dataset.
 
-The descriptive statistics show that there are outliers in most of the numerical columns. After checking for missing values, it was found that there were some in the columns named "last review" and "reviews per month.
-
-The "reviews per month" is a numerical column with a minimum value of 0.01 and a maximum value of 58.5, with the 75th percentile as 2.02. Due to the high level of variability in the column and the presence of outliers, using simple imputation techniques like mean, median, or mode is not viable. Since the datapoints are missing completely at random, KNN Imputation techniques are used to impute values to this column.
-
-The "last review" is a date column indicating the last date on which the review was posted for the particular listing. Since it is a date column and has no significant value to the price [target], it is better to split the values into month and year separately. The year column contains only data from 2011 to 2019, and there are 12 months in a year. As was done for the above column, in this case also the KNN 
-imputation technique was used to fill in missing values for both columns since in this case also the data points were completely missing at random.
-
-The first four columns (id, name, host name, and host id) in the dataset are excluded from the model-building process as they are considered to provide descriptive or identifying information rather than useful attributes for predicting listing prices.
-
-The treatment for outliers is done in the coming sections, where box-cox and power transformations are used to convert the columns into a normal distribution.
+Additionally, approximately 5% of missing data was detected in 4 to 5 columns. To address this, we applied **K-Nearest Neighbors (KNN)** Imputation techniques to replace the missing values, ensuring that the dataset maintained its integrity for further analysis. This approach helped preserve the underlying structure of the data while mitigating the impact of missing information.
 
 
 <a name="phase-2"></a>
@@ -129,179 +110,148 @@ The treatment for outliers is done in the coming sections, where box-cox and pow
 - Creating visualizations to summarize and present the data
 - Calculating summary statistics such as mean, median and standard deviation to describe the data
 
+<br>
+
+<img src="images\single_pie.png" alt="percentage-of-customers-who-left"></img>
+
+**Customer Satisfaction**: The high retention rate suggests that most customers are satisfied with the product or service. This could be due to effective customer service, high product quality, or competitive pricing.
+
+**Areas for Improvement**: The 16.84% attrition rate indicates that there are still some customers who are not fully satisfied. Identifying the reasons behind their departure can help in formulating strategies to reduce this percentage.
+
 <br><br>
 
-The longitude and latitude columns, along with the neighbourhood group containing 5 areas in NYC (Manhattan, Queens, Brooklyn, Staten Island, and Bronx) and price, are used to create a map using the package folium to understand the areas in NYC where the Airbnb listings are located. If we zoom into these values and hover over any points, we can see the respective neighbourhood group along with its price
+<img src="images\multiple_pie.png" alt="churn-percentage-by-gender"></img>
 
-<img src="images\map final.png" alt="map-of-new-york-city-with listings marked"></img>
+**Customer Satisfaction**: Both genders show high retention rates, indicating overall customer satisfaction. However, female customers appear to be slightly more satisfied or loyal.
 
-The two main categorical columns that can be seen in the data are neighbourhood group and room type. The frequency plots of these two attributes are as follows :
+**Targeted Strategies**: The higher attrition rate among male customers suggests a need for targeted strategies to improve their retention.
 
-<img src="images\neigh_group and room.png" alt="neighbourhood groups and room type"></img>
+<br><br>
 
-The percentage of room type containing 3 unique values [Private room, Entire home/apt and Shared room] for each neighbourhood can be demonstrated using a pie chart.
+<img src="images\churn-tenure.png" alt="churn-by-tenure-range"></img>
 
-<img src="images\room type in each neigh group.png" alt="distribution of room type in each neighbourhood group"></img>
+**Early Engagement**: The high churn rate in the first 18 months highlights the need for improved engagement and support for new customers. Ensuring a positive onboarding experience and addressing any initial issues promptly can help reduce early churn.
 
-The pie chart shows that almost all the neighbourhood groups contain above 50% of private rooms, except Manhattan, where the proportion of homes and apartments is higher.
+**Loyalty Programs**: The lower churn rates in the 18-30 and 30+ month ranges suggest that customers who stay longer are more loyal. Implementing loyalty programs and incentives for long-term customers can further enhance retention.
 
-Next comes the distribution of the target variable, which is the rental price, in each neighbourhood group and for each room type.
+**Targeted Interventions**: Identifying the specific reasons for early churn and addressing them through targeted interventions can help improve overall retention rates.
 
-<img src="images\distribution of price.png" alt="distribution of price"></img>
+<br><br>
 
-These two violin plots clearly indicates the presence of outliers in the price column.
+<img src="images\line.png" alt="estimated-monthly-spending-by-tenure"></img>
 
-For numerical columns boxplots and histograms can be used to understand the distribution of each attribute. An example of these two plots for the attribute availability 365 is shown below:
+**Early Engagement**: The high variability in spending among new customers highlights the importance of effective onboarding and engagement strategies to stabilize and increase spending.
 
-<img src="images\availability 365.png" alt="distribution of avalability of listings"></img>
+**Mid-Tenure Challenges**: The drop in spending around 30 months suggests potential challenges in maintaining customer interest and satisfaction during this period. Identifying and addressing these challenges can help sustain spending levels.
 
-The final observations from ploting these two graphs for all the numerical columns are as follows:
+**Long-Term Engagement**: The fluctuations in long-term spending indicate that even loyal customers may have periods of disengagement. Regularly refreshing engagement strategies can help maintain consistent spending.
 
-- All the variables except availability_365 is extremely right skewed
-- Except availability_365 all other numerical features have outliers.
+<br><br>
 
-The presence of multicolinearity can lead to unreliable, unstable, and inaccurate regression models, which can hinder our ability to make accurate predictions and draw meaningful conclusions from our data. A simple heatmap for the pairwise correlation of each attribute can be used to understand the relationship between them.
+<img src="images\churn-ss.png" alt="churn-by-satisfaction-score"></img>
 
-<img src="images\corr.png" alt="correlation-map"></img>
+**Retention Despite Low Satisfaction**: The high retention rates among customers with low satisfaction scores could indicate that these customers might be staying due to lack of alternatives or other factors not directly related to satisfaction.
 
-All the values in the heatmap are either less than 0.2 or greater than -0.2, which is almost close to zero. This shows that all the attributes are weakly correlated with  all other attributes.
+**Importance of Satisfaction**: The trend of decreasing churn with higher satisfaction scores underscores the importance of maintaining high customer satisfaction to reduce churn rates.
 
-A scatter plot can be used to analyse the relationship between two numerical columns. Taking price in the y-axis and rest of each numerical column in the x-axis along with different colour for different categories in room type scatter plots can be drawn as follows:
+<br><br>
 
-<img src="images\price vs num in room type.png" alt="price vs features in room type"></img>
+<img src="images\box.png" alt="boxen-plot-city-tier"></img>
 
-The problem that arises here is that there is no linear relationship that can be found for any of the numerical columns with respect to the target variable. This problem can be solved by using different transformation methods on the target variable.
+**Customer Behavior by City Tier**: Customers in higher city tiers (Tier 1) exhibit more variability in their spending behavior, possibly due to diverse economic conditions and spending power.
 
-<a name="phase-3"></a> 
-### Phase III - Feature Engineering
+**Satisfaction and Spending Stability**: Higher satisfaction scores are linked to more stable spending patterns, indicating that satisfied customers are less likely to react drastically to order amount hikes.
 
-The number of outliers in the target variable is checked using a box plot and is 2977 of 48895 records. So, it is better to remove these records from the original data for better predictions.
+<br><br>
 
-Since all the numerical columns are extremely right skewed with a lot of outliers, box-cox and boxcox1p using power transformer are used to transform the data points into normal curves.
+<img src="images\pairplot.png" alt="correlation-plot"></img>
 
-The box-cox transformation is used for attributes that are strictly positive; that is, zeros also cannot be included. The attributes “minimum nights” and “calculated host listings count” are transformed using simple box-cox method.
+**Targeted Retention Strategies**: Focus on customers with shorter tenures and higher monthly charges for retention efforts. Personalized offers or discounts could help reduce churn in these segments.
 
-In situations where the data points contain zero or negative values, boxcox1p along with a power transformer can be used to convert the data into normal curves. First, the power transformer is fitted into the data points to find out the lambda values, which are then used in boxcox1p to transform the respective columns into normal curves. All other numerical columns except the two mentioned above contain zeros and are thus transformed using this method.
+**Demographic-Specific Interventions**: Develop targeted strategies for senior citizens and customers without partners or dependents to address their specific needs and reduce churn.
 
-A small example of transformation for the column price, before and after is given below:
+**Service Optimization**: Evaluate the impact of phone service and multiple lines on customer satisfaction and churn. Consider offering bundled services or incentives to customers with multiple lines to enhance retention.
 
-<img src="images\boxcox-before-and-after.png" alt="price-transformation"></img>
-
-When dealing with categorical columns in nominal scale, such as "neighbourhood" and "neighbourhood group", the method of label encoding was applied. On the other hand, for columns in ordinal scale, such as "room type", one-hot encoding was implemented.
 
 <a name="model-fitting"></a>
 ## Fitting Models to the Data
 
 The train-test split method was used to evaluate the performance of machine learning models. This method involves splitting the available dataset into two 
-parts: a training set and a testing set. The training set,which accounted for 70% of the data, was used to train the machine learning models, while the remaining 30% was used for testing the models. The training set had 32,142 records, and the testing set had 13,776 records. The train-test split allowed for the evaluation of the machine learning models on new, unseen data, which is essential for determining their effectiveness and generalizability.
+parts: a training set and a testing set. The training set,which accounted for 80% of the data, was used to train the machine learning models, while the remaining 20% was used for testing the models. The training set had 4,504 records, and the testing set had 1,126 records. The train-test split allowed for the evaluation of the machine learning models on new, unseen data, which is essential for determining their effectiveness and generalizability.
 
-For a quick head start, an ExtraTreesRegressor was built on the data to understand the features that are important for model building. The result of this model when plotted onto a bar graph was as follows:
+<a name="log-reg"></a>
+### Logistic Regression
+A statistical model that predicts the probability of a binary outcome (such as success/failure, yes/no) based on one or more independent variables. 
 
-<img src="images\newplot.png" alt="extra-tree-regressor"></img>
+**Classification Report**
 
-The feature private room has a higher contribution for predicting price followed by longitude, latitude, etc...
 
-For each of the models given below, a GridSearchCV or RandomizedSearchCV was used to find the best parameters suitable for the models.
+                   precision    recall  f1-score   support
 
-<a name="lin-reg"></a>
-### Linear Regression
-A simple linear model that attempts to predict the relationship between a dependent variable and one or more independent variables through a linear equation.
+              0       0.91      0.96      0.93       938
+              1       0.73      0.50      0.59       188
 
-Best Parameters: {'fit_intercept': True}
+    accuracy                              0.89      1126
+    macro avg         0.82      0.73      0.76      1126
+    weighted avg      0.88      0.89      0.88      1126
 
-MAE : 0.54; MSE : 0.50; RMSE : 0.71; R2 : 0.52
+**Confusion Matrix**
+
+<img src="images\lg_cf.png" alt="log-reg-confusion-matrix"></img>
 
 <a name="dt"></a>
 ### Decision Tree
 A tree-structured model that breaks down a dataset into smaller and smaller subsets based on a set of decisions or rules until the subsets contain instances with a single class or value.
 
-Best Parameters: {'max_depth': 5, 'min_samples_leaf': 2, 'min_samples_split': 2}
+**Classification Report**
 
-MAE : 0.52; MSE : 0.45; RMSE : 0.67; R2 : 0.56
+                  precision    recall  f1-score   support
+
+             0       0.97      0.97      0.97       938
+             1       0.86      0.86      0.86       188
+
+    accuracy                             0.95      1126
+    macro avg        0.91      0.92      0.92      1126
+    weighted avg     0.95      0.95      0.95      1126
+
+**Confusion Matrix**
+
+<img src="images\dt_cf.png" alt="dt-confusion-matrix"></img>
+
 
 <a name="rf"></a>
 ### Random Forest
 An ensemble model that combines multiple decision trees to improve prediction accuracy and reduce overfitting.
 
-Best Parameters: {'n_estimators': 130, 'min_samples_split': 9, 'min_samples_leaf': 6, 'max_features': 10, 'max_depth': 10, 'bootstrap': True}
+**Classification Report**
 
-MAE : 0.47; MSE : 0.39; RMSE : 0.63; R2 : 0.62
+              precision    recall  f1-score   support
 
-<a name="knn"></a>
-### KNN
-A non-parametric model that predicts the value of a data point based on the values of its nearest neighbors in the training data.
+             0       0.96      1.00      0.98       938
+             1       0.97      0.81      0.89       188
 
-Best Parameters: {'weights': 'distance', 'p': 1, 'n_neighbors': 13, 'leaf_size': 44, 'algorithm': 'brute'}
+    accuracy                             0.97      1126
+    macro avg        0.97      0.90      0.93      1126
+    weighted avg     0.97      0.97      0.96      1126
 
-MAE : 0.60; MSE : 0.60; RMSE : 0.77; R2 : 0.43
+**Confusion Matrix**
 
-<a name="ada-boost"></a>
-### Ada Boost
-A boosting algorithm that combines multiple weak learners into a strong learner through weighted voting to improve prediction accuracy.
-
-Best Parameters: {'n_estimators': 400, 'learning_rate': 0.013848863713938732, 'base_estimator': DecisionTreeRegressor(max_depth=2)}
-
-MAE : 0.58; MSE : 0.55; RMSE : 0.74; R2 : 0.47
-
-<a name="gradient-boost"></a>
-### Gradient Boost
-A boosting algorithm that combines multiple weak learners to make a strong learner through an additive model, where each new learner corrects the errors of the previous one.
-
-Best Parameters: {'subsample': 0.8999999999999999, 'n_estimators': 600, 'min_samples_split': 6, 'max_depth': 7, 'learning_rate': 0.018307382802953697}
-
-MAE : 0.46; MSE : 0.38; RMSE : 0.62; R2 : 0.63
-
-<a name="light-gbm"></a>
-### Light GBM
-A gradient boosting framework that uses a tree-based learning algorithm and aims to improve efficiency, accuracy, and speed by using a novel technique called 
-Gradient-based One-Side Sampling (GOSS).
-
-Best Parameters: {'num_leaves': 38, 'n_estimators': 170, 'min_data_in_leaf': 23, 'max_depth': 10, 'learning_rate': 0.13219411484660287, 'feature_fraction': 0.8, 'colsample_bytree': 0.5}
-
-MAE : 0.46; MSE : 0.38; RMSE : 0.62; R2 : 0.63
-
-<a name="cat-boost"></a>
-### Cat Boost
-A gradient boosting framework that uses categorical features as input and applies a novel algorithm called Ordered Boosting to reduce overfitting and improve 
-prediction accuracy.
-
-Best Parameters: {'subsample': 0.8999999999999999, 'n_estimators': 600, 'max_depth': 9, 'learning_rate': 0.061359072734131756, 'l2_leaf_reg': 54.62277217684348, 'colsample_bylevel': 0.7999999999999999}
-
-MAE : 0.46; MSE : 0.38; RMSE : 0.62; R2 : 0.63
-
-<a name="xg-boost"></a>
-### XGBoost
-A gradient boosting framework that uses a tree-based learning algorithm and applies several techniques to improve prediction accuracy, such as regularization, parallel processing, and sparsity awareness.
-
-Best Parameters: {'subsample': 0.7999999999999999, 'reg_alpha': 0.016681005372000592, 'n_estimators': 500, 'max_depth': 9, 'learning_rate': 0.018307382802953697, 'gamma': 0.1291549665014884, 'colsample_bytree': 0.6}
-
-MAE : 0.46; MSE : 0.37; RMSE : 0.61; R2 : 0.64
+<img src="images\rf_cf.png" alt="rf-confusion-matrix"></img>
 
 <a name="key-findings"></a>
 ## Key Findings
-XGBoost performed the best among all the models tested, with an R-squared score of 0.64, indicating that 64% of the variance in the target variable can be explained by this model.
-
-<img src="images\cv point plot.png" alt="model-comparison"></img>
-The point plot shows that XGBoost had the highest performance, followed by Cat Boost, Light GBM, Gradient Boost and Random Forest while KNN had the lowest performance.
-
-Linear regression, Decision Tree and AdaBoost, performed somewhere in between XGBoost and KNN.
-
-<img src="images\final table.png" alt="table-model-comparison"></img>
-
-The table shows that XGBoost had the lowest mean squared 
-error (MSE), root mean squared error (RMSE), and 
-mean absolute error (MAE), and the highest R-squared 
-score among all the models tested.
+Random Forest performed the best among all the models tested, with a better train accuracy as well as test accuracy.
 
 <a name="recommendation"></a>
 ## Recommendations
-- Based on the analysis, XGBoost is recommended as the best model for the given dataset and target variable. Further optimization and tuning of XGBoost could potentially improve its performance.
-- Feature engineering and selection could be explored to potentially improve the performance of the models.
-- Cross-validation techniques such as k-fold or stratified k-fold can be used to validate the model's performance on different subsets of the data and avoid overfitting.
+- During our analysis we found that most customers are leaving at the first few months of the service tenure. These customers churned maybe because they found a better alternative to what the company was already offering. A better understanding of the competitora as well as providing attractive offers to new customers can be a way to improve retention.
+- Actively seeking feedback from customers who leave early as well as concentrating on providing flexible plans to cities where the customer satisfaction scores are low can be also implemented to reduce churn.
+- Implementing regular follow-up to customers who recently joined can improve their perspective of the company as well as motivate them to refer others.
 
 <a name="conclusion"></a>
 ## Conclusion
-- The results of the analysis indicate that XGBoost is the most suitable model for the given dataset and target variable.
-- The study demonstrates the importance of exploring multiple models and evaluating their performance to select the best one for the given problem.
-- The findings can be used to make data-driven decisions and improve the performance of the model for similar problems in the future.
+- In conclusion, the E-commerce Churn Analysis project successfully developed a machine learning model capable of predicting customer churn with high accuracy. By leveraging various features such as customer demographics, purchasing behavior, and engagement metrics, the model provides valuable insights into the factors driving customer attrition.
 
+- The use of advanced data preprocessing techniques, including the handling of duplicate entries and missing values through KNN Imputation, ensured the dataset’s quality and reliability. The findings from this project can help e-commerce platforms implement targeted retention strategies, improve customer experiences, and ultimately reduce churn rates.
+
+- This analysis not only offers immediate business value but also contributes to a broader understanding of customer retention in the e-commerce sector. Future research can further refine these models and explore additional factors influencing churn, enhancing the effectiveness of data-driven decision-making in this dynamic industry.
