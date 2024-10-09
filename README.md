@@ -225,7 +225,7 @@ An ensemble model that combines multiple decision trees to improve prediction ac
 
 **Classification Report**
 
-              precision    recall  f1-score   support
+                  precision    recall  f1-score   support
 
              0       0.96      1.00      0.98       938
              1       0.97      0.81      0.89       188
